@@ -58,5 +58,77 @@ private:
 	TreeNode<T>* m_right;
 };
 
+template<typename T>
+inline TreeNode<T>::TreeNode(T value)
+{
+	setData(value);
+}
 
+template<typename T>
+inline bool TreeNode<T>::hasLeft()
+{
+	return m_left != nullptr;
+}
 
+template<typename T>
+inline bool TreeNode<T>::hasRight()
+{
+	return m_right != nullptr;
+}
+
+template<typename T>
+inline T TreeNode<T>::getData()
+{
+	return m_value;
+}
+
+template<typename T>
+inline TreeNode<T>* TreeNode<T>::getLeft()
+{
+	return m_left;
+}
+
+template<typename T>
+inline TreeNode<T>* TreeNode<T>::getRight()
+{
+	return m_right;
+}
+
+template<typename T>
+inline void TreeNode<T>::setData(T value)
+{
+	m_value = value;
+}
+
+template<typename T>
+inline void TreeNode<T>::setLeft(TreeNode<T>* node)
+{
+	m_left = node;
+}
+
+template<typename T>
+inline void TreeNode<T>::setRight(TreeNode<T>* node)
+{
+	m_right = node;
+}
+
+template<typename T>
+inline void TreeNode<T>::draw(int x, int y, bool selected)
+{
+	//Creates an array to stoere the string represseination of value
+	static char buffer[10];
+
+	//Converts the value a string and soteres it in the array
+	sprintf(buffer, "%d", m_value);
+
+	//Draws the circle to represnet the node
+	DrawCircle(x, y, 30, YELLOW);
+
+	//If the node is current selcevted node change its color
+	if (selected)
+		DrawCircle(x, y, 28, BLACK);
+	DrawCircle(x, y, 28, GREEN);
+
+	//Draw the value of the node inside its circle
+	DrawText(buffer, x - 12, y - 12, 12, WHITE);
+}
