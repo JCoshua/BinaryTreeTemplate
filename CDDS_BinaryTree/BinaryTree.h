@@ -49,9 +49,6 @@ private:
 
 	TreeNode<T>* m_root = nullptr;
 };
-
-
-
 #endif
 
 template<typename T>
@@ -75,7 +72,7 @@ inline void BinaryTree<T>::insert(T value)
 
 	//Creates pointer for the current node and its parent
 	TreeNode<T>* currentNode = m_root;
-	TreeNode<T>* parentNode = currentNode;
+	TreeNode<T>* parentNode;
 
 	//While the current node exists
 	while (currentNode)
@@ -83,32 +80,24 @@ inline void BinaryTree<T>::insert(T value)
 		//Makes the parent node become the current node
 		parentNode = currentNode;
 
-		//If the current node's value is less than the inserted value
+		//If the current node's value is less than the inserted value, move the current node to the right
 		if (currentNode->getData() < value)
-		{
-			//Make the current value the next node to the right
 			currentNode = currentNode->getRight();
-		}
 
-		//If the current node's value is greater than the inserted value
+		//If the current node's value is greater than the inserted value, move the current node to the left
 		else if (currentNode->getData() > value)
-		{
-			//Make the current value the next node to the left
 			currentNode = currentNode->getLeft();
-		}
 	}
+
 	//Make the current node become a node with the value to be inserted
 	currentNode = new TreeNode<T>(value);
 
-	///If the root node exists
-	if (m_root)
+	///If the parent node exist, make the inserted node a leaf of the node
+	if (parentNode)
 	{
-		//If the parents node's data is greater than the inserted node's
 		if (parentNode->getData() > currentNode->getData())
-			//set the parent's node's left to be the inserted node
 			parentNode->setLeft(currentNode);
 		else
-			//Set the parent's node's right to be the inserted node
 			parentNode->setRight(currentNode);
 	}
 	else
@@ -118,88 +107,81 @@ inline void BinaryTree<T>::insert(T value)
 template<typename T>
 inline void BinaryTree<T>::remove(T value)
 {
-	//IF the value is null
+	//Return if the value is null or not in the tree
 	if (value == NULL || !find(value))
 		return;
 
-	//Create a pointer to the node to remove and its parent
-	TreeNode<T>* currentNode;
+	TreeNode<T>* nodeToRemove;
 	TreeNode<T>* parentNode = nullptr;
 
-	findNode(value, currentNode, parentNode);
+	//Sets the pointers to be the node to remove and its parent
+	findNode(value, nodeToRemove, parentNode);
 
 	//If the node has two leaves
-	if (currentNode->hasLeft() && currentNode->hasRight())
+	if (nodeToRemove->hasLeft() && nodeToRemove->hasRight())
 	{
 		//Create a pointer to nodes to replace the node to remove
-		TreeNode<T>* replacementNode = currentNode->getRight();
-		TreeNode<T>* replacementParent = currentNode;
+		TreeNode<T>* replacementNode = nodeToRemove->getRight();
+		TreeNode<T>* replacementParent = nodeToRemove;
 
-		//Make the replacement node be the leftmost node to the right of the current node
 		while (replacementNode->hasLeft())
 		{
-			//Makes the parent node become the current node
+			//Makes the parent of the replacement node equal to its leaf, then moves its leaf to the left
 			replacementParent = replacementNode;
-
-			//Makes the replacement node become the next value to the left
 			replacementNode = replacementNode->getLeft();
 		}
 
-		if (replacementParent != currentNode)
-		{
-			if (replacementNode->hasRight())
-				replacementParent->setLeft(replacementNode->getRight());
-			else
-				replacementParent->setLeft(nullptr);
+		//Change the removed node with the replacement node
+		replacementParent->setLeft(replacementNode->getRight());
+		replacementNode->setLeft(nodeToRemove->getLeft());
+		if (replacementParent != nodeToRemove)
+			replacementNode->setRight(nodeToRemove->getRight());
+		
 
-			replacementNode->setRight(currentNode->getRight());
-		}
-		replacementNode->setLeft(currentNode->getLeft());
-
-		//If the current node has no parent node
-		if (!parentNode)
+		//If the removed node had a parent
+		if (parentNode)
 		{
-			//Make the current node the root node
-			m_root = replacementNode;
-		}
-		else
-			if (parentNode->getLeft() == currentNode)
+			//Make the parent's leaf become the replacement node
+			if (parentNode->getLeft() == nodeToRemove)
 				parentNode->setLeft(replacementNode);
 			else
 				parentNode->setRight(replacementNode);
+		}
+		else
+			m_root = replacementNode;
 	}
 
 	//If it only has one leaf
-	else if (currentNode->hasLeft() || currentNode->hasRight())
+	else if (nodeToRemove->hasLeft() || nodeToRemove->hasRight())
 	{
 		//If the current node has no parent node
 		if (!parentNode)
 		{
-			//Sets the leaf to by the root node
-			if (currentNode->hasLeft())
-				m_root = currentNode->getLeft();
+			//Sets the leaf to be the root node
+			if (nodeToRemove->hasLeft())
+				m_root = nodeToRemove->getLeft();
 			else
-				m_root = currentNode->getRight();
+				m_root = nodeToRemove->getRight();
 		}
 
 		//If the parent's left leaf is the node to remove
-		else if (parentNode->getLeft() == currentNode)
+		else if (parentNode->getLeft() == nodeToRemove)
 		{
-			//Set the parent's left leaf to the leaf of the removed node
-			if (currentNode->hasLeft())
-				parentNode->setLeft(currentNode->getLeft());
+			//Set the parent's left leaf to be the leaf of the removed node
+			if (nodeToRemove->hasLeft())
+				parentNode->setLeft(nodeToRemove->getLeft());
 			else
-				parentNode->setLeft(currentNode->getRight());
+				parentNode->setLeft(nodeToRemove->getRight());
 		}
 
 		//If the parent's right leaf is the node to remove
-		else if (parentNode->getRight() == currentNode)
+		else if (parentNode->getRight() == nodeToRemove)
 		{
-			//Set the parent's right leaf to the leaf of the removed node
-			if (currentNode->hasLeft())
-				parentNode->setRight(currentNode->getLeft());
+			//Set the parent's right leaf to be the leaf of the removed node
+			if (nodeToRemove->hasLeft())
+				parentNode->setRight(nodeToRemove->getLeft());
 			else
-				parentNode->setRight(currentNode->getRight());
+				parentNode->setRight(nodeToRemove->getRight());
 		}
 	}
 
@@ -207,24 +189,18 @@ inline void BinaryTree<T>::remove(T value)
 	else if (parentNode != nullptr)
 	{
 		//If the parent's left leaf is the node to remove
-		if (parentNode->getLeft() == currentNode)
-			//Set the parent's left leaf to the leaf of the removed node
-			if (currentNode->getLeft())
+		if (parentNode->getLeft() == nodeToRemove)
 				parentNode->setLeft(nullptr);
-			else
-				parentNode->setLeft(nullptr);
+
 		//If the parent's right leaf is the node to remove
-		else if (parentNode->getRight() == currentNode)
-			//Set the parent's right leaf to the leaf of the removed node
-			if (currentNode->getLeft())
-				parentNode->setRight(nullptr);
-			else
+		else if (parentNode->getRight() == nodeToRemove)
 				parentNode->setRight(nullptr);
 	}
 	else
 		m_root = nullptr;
+
 	//Deletes the current node
-	currentNode = nullptr;
+	nodeToRemove = nullptr;
 }
 
 template<typename T>
@@ -252,6 +228,7 @@ inline TreeNode<T>* BinaryTree<T>::find(T value)
 			else if (currentNode->getData() == value)
 				break;
 		}
+
 	//return the found node
 	return currentNode;
 }
@@ -276,16 +253,14 @@ inline bool BinaryTree<T>::findNode(T searchValue, TreeNode<T>*& nodeFound, Tree
 		//Makes the parent node become the current node
 		nodeParent = nodeFound;
 
-		//If the current node's value is less than the inserted value
+		//If the current node's value is less than the inserted value, move the node to the right
 		if (nodeFound->getData() < searchValue)
-			//Make the current value the next node to the right
 			nodeFound = nodeFound->getRight();
-		//If the current node's value is greater than the inserted value
+
+		//If the current node's value is greater than the inserted value, move the node to the left
 		else if (nodeFound->getData() > searchValue)
-			//Make the current value the next node to the left
 			nodeFound = nodeFound->getLeft();
 	}
-
 	return true;
 }
 
