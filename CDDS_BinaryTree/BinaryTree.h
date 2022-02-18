@@ -72,7 +72,7 @@ inline void BinaryTree<T>::insert(T value)
 
 	//Creates pointer for the current node and its parent
 	TreeNode<T>* currentNode = m_root;
-	TreeNode<T>* parentNode;
+	TreeNode<T>* parentNode = nullptr;
 
 	//While the current node exists
 	while (currentNode)
